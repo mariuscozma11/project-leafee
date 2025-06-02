@@ -1,0 +1,6 @@
+{
+    "watch": ["*.js", "websockets/*.js"], 
+    "ext": "js",                        
+    "ignore": ["state.json", "latest_readings.json", "node_modules/*"], 
+    "exec": "node index.js"
+  }
