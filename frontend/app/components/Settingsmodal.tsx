@@ -1,28 +1,30 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
-    Dimensions,
-    Keyboard,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    View
+  Dimensions,
+  Keyboard,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+  Image,
+  TextInput,
 } from "react-native";
 import {
-    Gesture,
-    GestureDetector,
-    GestureHandlerRootView,
+  Gesture,
+  GestureDetector,
+  GestureHandlerRootView,
 } from "react-native-gesture-handler";
 import Animated, {
-    runOnJS,
-    useAnimatedStyle,
-    useSharedValue,
-    withSpring,
-    withTiming,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
 } from "react-native-reanimated";
 
 //VARIABILE PENTRU ANIMATIE
@@ -32,15 +34,16 @@ const THRESHOLD = 50;
 const Settingsmodal = ({
   settingsModal,
   closeSettingsModal,
+  plantData,
+  onSave
 }: {
   settingsModal: boolean;
   closeSettingsModal: () => void;
+  plantData: any;
+  onSave: (obj: any) => void;
 }) => {
- 
-  const handleSave = async () => {
-    
-  };
-
+  const [inputPlantData, setInputPlantData] = useState(plantData);
+  
 
   //LOGICA ANIMATIE DESCHIDERE MODAL
   const translateY = useSharedValue(SCREEN_HEIGHT);
@@ -118,6 +121,128 @@ const Settingsmodal = ({
                 <Animated.View style={[styles.modalContent, rModalStyle]}>
                   <View style={styles.modalHandle} />
                   <ScrollView bounces={false}>
+                    <Text style={styles.modalTitle}>Edit Plant Details</Text>
+
+                    <TouchableOpacity style={styles.imagePickerButton}>
+                      <Image style={styles.previewImage} />
+                      <Text style={styles.imagePickerText}>Change Image</Text>
+                    </TouchableOpacity>
+
+                    <Text style={styles.inputLabel}>Nume Planta</Text>
+                    <TextInput style={styles.input} />
+
+                    <Text style={styles.inputLabel}>Umiditate Optima</Text>
+                    <View style={styles.rangeInputContainer}>
+                      <TextInput
+                        style={styles.rangeInput}
+                        keyboardType="numeric"
+                        value={inputPlantData.humidity.min}
+                        onChangeText={(text) =>
+                          setInputPlantData((prev:any) => ({
+                            ...prev,
+                            humidity: { ...prev.humidity, min: text },
+                          }))
+                        }
+                      />
+                      <Text style={styles.rangeSeparator}>-</Text>
+                      <TextInput
+                        style={styles.rangeInput}
+                        keyboardType="numeric"
+                        value={inputPlantData.humidity.max}
+                        onChangeText={(text) =>
+                          setInputPlantData((prev:any) => ({
+                            ...prev,
+                            humidity: { ...prev.humidity, max: text },
+                          }))
+                        }
+                      />
+                      <Text> %</Text>
+                    </View>
+
+                    <Text style={styles.inputLabel}>Umiditate Aer Optima</Text>
+                    <View style={styles.rangeInputContainer}>
+                      <TextInput
+                        style={styles.rangeInput}
+                        keyboardType="numeric"
+                        value={inputPlantData.airHumidity.min}
+                        onChangeText={(text) =>
+                          setInputPlantData((prev:any) => ({
+                            ...prev,
+                            airHumidity: { ...prev.airHumidity, min: text },
+                          }))
+                        }
+                        
+                      />
+                      <Text style={styles.rangeSeparator}>-</Text>
+                      <TextInput
+                        style={styles.rangeInput}
+                        keyboardType="numeric"
+                        value={inputPlantData.airHumidity.max}
+                        onChangeText={(text) =>
+                          setInputPlantData((prev:any) => ({
+                            ...prev,
+                            airHumidity: { ...prev.airHumidity, max: text },
+                          }))
+                        }
+                      />
+                      <Text> %</Text>
+                    </View>
+
+                    <Text style={styles.inputLabel}>Luminozitate Optima</Text>
+                    <View style={styles.rangeInputContainer}>
+                      <TextInput
+                        style={styles.rangeInput}
+                        keyboardType="numeric"
+                        value={inputPlantData.brightness.min}
+                        onChangeText={(text) =>
+                          setInputPlantData((prev:any) => ({
+                            ...prev,
+                            brightness: { ...prev.brightness, min: text },
+                          }))
+                        }
+                      />
+                      <Text style={styles.rangeSeparator}>-</Text>
+                      <TextInput
+                        style={styles.rangeInput}
+                        keyboardType="numeric"
+                        value={inputPlantData.brightness.max}
+                        onChangeText={(text) =>
+                          setInputPlantData((prev:any) => ({
+                            ...prev,
+                            brightness: { ...prev.brightness, max: text },
+                          }))
+                        }
+                      />
+                      <Text> Lum</Text>
+                    </View>
+
+                    <Text style={styles.inputLabel}>Temperatura Optima</Text>
+                    <View style={styles.rangeInputContainer}>
+                      <TextInput
+                        style={styles.rangeInput}
+                        keyboardType="numeric"
+                        value={inputPlantData.temperature.min}
+                        onChangeText={(text) =>
+                          setInputPlantData((prev:any) => ({
+                            ...prev,
+                            temperature: { ...prev.temperature, min: text },
+                          }))
+                        }
+                      />
+                      <Text style={styles.rangeSeparator}>-</Text>
+                      <TextInput
+                        style={styles.rangeInput}
+                        keyboardType="numeric"
+                        value={inputPlantData.temperature.max}
+                        onChangeText={(text) =>
+                          setInputPlantData((prev:any) => ({
+                            ...prev,
+                            temperature: { ...prev.temperature, max: text },
+                          }))
+                        }
+                      />
+                      <Text> °C</Text>
+                    </View>
                     <View style={styles.modalButtons}>
                       <TouchableOpacity
                         style={styles.cancelButton}
@@ -129,7 +254,7 @@ const Settingsmodal = ({
                       <TouchableOpacity
                         style={styles.saveButton}
                         onPress={() => {
-                          handleSave();
+                          onSave(inputPlantData);
                         }}
                       >
                         <Text style={styles.saveButtonText}>Salvare</Text>
@@ -148,6 +273,46 @@ const Settingsmodal = ({
 
 export default Settingsmodal;
 const styles = StyleSheet.create({
+  rangeSeparator: {
+    marginHorizontal: 10,
+    fontSize: 20,
+    color: "#666",
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#DDD",
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 15,
+    fontFamily: "Quicksand-Regular",
+  },
+  imagePickerText: {
+    fontFamily: "Quicksand-Regular",
+    color: "#4A90E2",
+    fontSize: 16,
+  },
+  previewImage: {
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    marginBottom: 10,
+  },
+  rangeInputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 15,
+  },
+  imagePickerButton: {
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 24,
+    color: "#333",
+    marginBottom: 20,
+    textAlign: "center",
+  },
   programControls: {
     flexDirection: "row",
     justifyContent: "space-between",

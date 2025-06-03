@@ -35,7 +35,7 @@ const ListaProgramari = () => {
   };
   useEffect(() => {
     getProgramari();
-  }, [getProgramari()]);
+  }, []);
 
   return (
     <Fragment>

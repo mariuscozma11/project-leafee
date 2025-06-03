@@ -12,7 +12,7 @@ function broadcastMessage(msg) {
 }
 
 function startWebSocketServer(port = 3000) {
-  const server = http.createServer(); // fără Express
+  const server = http.createServer();
   const wss = new WebSocketServer({ server });
 
   console.log(`Server WebSocket (ws) pornit pe portul ${port}`);

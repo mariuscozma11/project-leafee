@@ -1,41 +1,84 @@
 import {
-    Clock,
-    Droplets,
-    Pencil,
-    Play,
-    Sun,
-    Thermometer,
-    Wind
+  Clock,
+  Droplets,
+  Pencil,
+  Play,
+  Sun,
+  Thermometer,
+  Wind,
 } from "lucide-react-native";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-interface PlantData {
-  name: string;
-  image: string;
-  humidity: {
-    min: string;
-    max: string;
-  };
-  airHumidity: {
-    min: string;
-    max: string;
-  };
-  brightness: string;
-  temperature: {
-    min: string;
-    max: string;
-  };
-}
 
-const Plantcard = ({openModalProgramare, openSettingsModal}:{openModalProgramare:() => void, openSettingsModal:()=>void}) => {
-  const [plantData, setPlantData] = useState<PlantData>({
-    name: "Monstera Deliciosa",
-    image: "https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=800",
-    humidity: { min: "60", max: "80" },
-    airHumidity: { min: "40", max: "60" },
-    brightness: "800",
-    temperature: { min: "20", max: "25" },
+interface Readings {
+  umSol: string;
+  umAer: string;
+  lum: string;
+  temp: string;
+}
+const Plantcard = ({
+  openModalProgramare,
+  openSettingsModal,
+  plantData
+}: {
+  openModalProgramare: () => void;
+  openSettingsModal: () => void;
+  plantData: any
+}) => {
+  const [readings, setReadings] = useState<Readings>({
+    umSol: "-",
+    umAer: "-",
+    lum: "-",
+    temp: "-",
   });
+  
+  const ws = useRef<WebSocket | null>(null); 
+  useEffect(() => {
+    const ws = new WebSocket("ws://localhost:3000");
+
+    ws.onopen = () => {
+      console.log("Connection Established!");
+    };
+    ws.onmessage = (event) => {
+      const response = JSON.parse(event.data);
+      const soilValue = Math.round(
+        ((4095 - response.soil) / (4095 - 100)) * 100
+      ).toString();
+
+      console.log(response);
+      setReadings({
+        umSol: soilValue,
+        umAer: response.hum,
+        lum: response.lux,
+        temp: response.temp,
+      });
+    };
+    ws.onclose = () => {
+      console.log("Connection Closed!");
+      setReadings({
+        umSol: "-",
+        umAer: "-",
+        lum: "-",
+        temp: "-",
+      });
+    };
+
+    ws.onerror = () => {
+      console.log("WS Error");
+    };
+
+ 
+
+    return () => {
+      ws.close();
+    };
+  }, []);
+  const sendPump = (state:string) => {
+  if (ws.current && ws.current.readyState === 1) {
+    ws.current.send(state);
+  }
+};
+     
   return (
     <View style={styles.plantCard}>
       <Image source={{ uri: plantData.image }} style={styles.plantImage} />
@@ -47,40 +90,51 @@ const Plantcard = ({openModalProgramare, openSettingsModal}:{openModalProgramare
           <View style={styles.parameter}>
             <Droplets size={20} color="#4A90E2" />
             <Text style={styles.parameterText}>
-              {plantData.humidity.min}%-{plantData.humidity.max}% : -%
+              {plantData.humidity.min}%-{plantData.humidity.max}% :{" "}
+              {readings.umSol}%
             </Text>
           </View>
 
           <View style={styles.parameter}>
             <Wind size={20} color="#4A90E2" />
             <Text style={styles.parameterText}>
-              {plantData.airHumidity.min}%-{plantData.airHumidity.max}% : -%
+              {plantData.airHumidity.min}%-{plantData.airHumidity.max}% :{" "}
+              {readings.umAer}%
             </Text>
           </View>
 
           <View style={styles.parameter}>
             <Sun size={20} color="#FFB800" />
             <Text style={styles.parameterText}>
-              {plantData.brightness} Lum : - Lum
+              {plantData.brightness.min}-{plantData.brightness.max} Lum :{" "}
+              {readings.lum} Lum
             </Text>
           </View>
 
           <View style={styles.parameter}>
             <Thermometer size={20} color="red" />
             <Text style={styles.parameterText}>
-              {plantData.temperature.min}°C-{plantData.temperature.max}°C : - °C
+              {plantData.temperature.min}°C-{plantData.temperature.max}°C :{" "}
+              {readings.temp} °C
             </Text>
           </View>
         </View>
         <View style={styles.buttonContainer}>
-          <TouchableOpacity onPress={openModalProgramare} style={styles.editButton}>
+          <TouchableOpacity
+            onPress={openModalProgramare}
+            style={styles.editButton}
+          >
             <Clock size={20} color="#4A90E2" />
           </TouchableOpacity>
-          <TouchableOpacity onPress={openSettingsModal} style={styles.editButton}>
+          <TouchableOpacity
+            onPress={openSettingsModal}
+            style={styles.editButton}
+          >
             <Pencil size={20} color="#4A90E2" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.playButton}>
+          <TouchableOpacity style={styles.playButton}  onPressIn={()=>{sendPump("1")}}
+              onPressOut={()=>{sendPump("0")}}>
             <Play size={20} color="#34C759" />
           </TouchableOpacity>
         </View>
