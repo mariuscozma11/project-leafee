@@ -8,11 +8,10 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
-  Image,
-  TextInput,
 } from "react-native";
 import {
   Gesture,
@@ -26,35 +25,49 @@ import Animated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
-import * as ImagePicker from 'expo-image-picker';
+
 //VARIABILE PENTRU ANIMATIE
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 const THRESHOLD = 50;
-
-const Settingsmodal = ({
-  settingsModal,
-  closeSettingsModal,
-  plantData,
-  onSave,
-
+const INITIAL_PLANT_DATA = {
+    name: "",
+    image: "",
+    humidity: { min: "", max: "" },
+    airHumidity: { min: "", max: "" },
+    brightness: { min: "", max: "" },
+    temperature: { min: "", max: "" },
+  };
+const Addplantmodal = ({
+  libraryModal,
+  closeLibraryModal,
 }: {
-  settingsModal: boolean;
-  closeSettingsModal: () => void;
-  plantData: any;
-  onSave: (obj: any) => void;
+  libraryModal: boolean;
+  closeLibraryModal: () => void;
 }) => {
-  const [inputPlantData, setInputPlantData] = useState(plantData);
+  const [inputPlantData, setInputPlantData] = useState(INITIAL_PLANT_DATA);
+
+  const postPlanta = async() =>{
+      try {
+        const planta = await fetch("http://192.168.10.51:5000/api/plante",{
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify([inputPlantData])
+        })
+      } catch (error) {
+        console.error(error)
+      }
+    }
   //LOGICA ANIMATIE DESCHIDERE MODAL
   const translateY = useSharedValue(SCREEN_HEIGHT);
   const overlayOpacity = useSharedValue(0);
 
   useEffect(() => {
-    if (settingsModal) {
+    if (libraryModal) {
       // Open animation
       overlayOpacity.value = withTiming(1, { duration: 200 });
       translateY.value = withSpring(0, { damping: 50 });
     }
-  }, [overlayOpacity, settingsModal, translateY]);
+  }, [overlayOpacity, libraryModal, translateY]);
   const context = useSharedValue({ y: 0 });
   const gesture = Gesture.Pan()
     .onStart(() => {
@@ -72,8 +85,8 @@ const Settingsmodal = ({
       if (translateY.value > THRESHOLD) {
         translateY.value = withSpring(SCREEN_HEIGHT, { damping: 50 });
         overlayOpacity.value = withTiming(0, { duration: 200 });
-        if (settingsModal) {
-          runOnJS(closeSettingsModal)();
+        if (libraryModal) {
+          runOnJS(closeLibraryModal)();
         }
       } else {
         translateY.value = withSpring(0);
@@ -98,27 +111,23 @@ const Settingsmodal = ({
     overlayOpacity.value = 0;
   };
   const handleCancel = () => {
+    setInputPlantData(INITIAL_PLANT_DATA);
     resetAnimation();
-    closeSettingsModal();
+    closeLibraryModal();
   };
-  const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
+  const handleSave = async() =>{
+    await postPlanta();
+    setInputPlantData(INITIAL_PLANT_DATA);
+    resetAnimation();
+    closeLibraryModal();
+  }
 
-    if (!result.canceled) {
-      setInputPlantData({ ...plantData, image: result.assets[0].uri });
-    }
-  };
   return (
     <Modal
       animationType="none"
       transparent={true}
-      visible={settingsModal}
-      onRequestClose={closeSettingsModal}
+      visible={libraryModal}
+      onRequestClose={closeLibraryModal}
     >
       <GestureHandlerRootView style={{ flex: 1 }}>
         <KeyboardAvoidingView
@@ -132,22 +141,28 @@ const Settingsmodal = ({
                 <Animated.View style={[styles.modalContent, rModalStyle]}>
                   <View style={styles.modalHandle} />
                   <ScrollView bounces={false}>
-                    <Text style={styles.modalTitle}>Editeaza parametrii plantei</Text>
+                    <Text style={styles.modalTitle}>Adaugare planta</Text>
 
-                    <TouchableOpacity style={styles.imagePickerButton} onPress={pickImage}>
-                      <Image source={{ uri: inputPlantData.image }} style={styles.previewImage} />
-                      <Text style={styles.imagePickerText}>Adauga Imagine</Text>
-                    </TouchableOpacity>
+                    <Text style={styles.inputLabel}>Adaugare Imagine</Text>
+                    <TextInput
+                      style={styles.input}
+                      onChangeText={(text) =>
+                        setInputPlantData((prev: any) => ({
+                          ...prev,
+                          image: text,
+                        }))
+                      }
+                    />
 
                     <Text style={styles.inputLabel}>Nume Planta</Text>
                     <TextInput
                       style={styles.input}
                       value={inputPlantData.name || ""}
                       onChangeText={(text) =>
-                      setInputPlantData((prev: any) => ({
-                        ...prev,
-                        name: text,
-                      }))
+                        setInputPlantData((prev: any) => ({
+                          ...prev,
+                          name: text,
+                        }))
                       }
                     />
 
@@ -272,10 +287,7 @@ const Settingsmodal = ({
 
                       <TouchableOpacity
                         style={styles.saveButton}
-                        onPress={() => {
-                          onSave(inputPlantData);
-                          closeSettingsModal()
-                        }}
+                        onPress={handleSave}
                       >
                         <Text style={styles.saveButtonText}>Salvare</Text>
                       </TouchableOpacity>
@@ -291,11 +303,11 @@ const Settingsmodal = ({
   );
 };
 
-export default Settingsmodal;
+export default Addplantmodal;
 const styles = StyleSheet.create({
   rangeSeparator: {
     marginHorizontal: 10,
-    fontSize: 20,
+    fontSize: 15,
     color: "#666",
   },
   input: {
@@ -320,7 +332,7 @@ const styles = StyleSheet.create({
   rangeInputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: 15,
   },
   imagePickerButton: {
     alignItems: "center",
@@ -330,7 +342,7 @@ const styles = StyleSheet.create({
     fontFamily: "Quicksand-Bold",
     fontSize: 24,
     color: "#333",
-    marginBottom: 20,
+    marginBottom: 15,
     textAlign: "center",
   },
   programControls: {

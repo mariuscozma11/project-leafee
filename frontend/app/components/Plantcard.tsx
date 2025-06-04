@@ -19,11 +19,11 @@ interface Readings {
 const Plantcard = ({
   openModalProgramare,
   openSettingsModal,
-  plantData
+  plantData,
 }: {
   openModalProgramare: () => void;
   openSettingsModal: () => void;
-  plantData: any
+  plantData: any;
 }) => {
   const [readings, setReadings] = useState<Readings>({
     umSol: "-",
@@ -31,8 +31,8 @@ const Plantcard = ({
     lum: "-",
     temp: "-",
   });
-  
-  const ws = useRef<WebSocket | null>(null); 
+
+  const ws = useRef<WebSocket | null>(null);
   useEffect(() => {
     const ws = new WebSocket("ws://localhost:3000");
 
@@ -67,18 +67,15 @@ const Plantcard = ({
       console.log("WS Error");
     };
 
- 
-
     return () => {
       ws.close();
     };
   }, []);
-  const sendPump = (state:string) => {
-  if (ws.current && ws.current.readyState === 1) {
-    ws.current.send(state);
-  }
-};
-     
+  const sendPump = (state: string) => {
+    if (ws.current && ws.current.readyState === 1) {
+      ws.current.send(state);
+    }
+  };
   return (
     <View style={styles.plantCard}>
       <Image source={{ uri: plantData.image }} style={styles.plantImage} />
@@ -133,8 +130,15 @@ const Plantcard = ({
             <Pencil size={20} color="#4A90E2" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.playButton}  onPressIn={()=>{sendPump("1")}}
-              onPressOut={()=>{sendPump("0")}}>
+          <TouchableOpacity
+            style={styles.playButton}
+            onPressIn={() => {
+              sendPump("1");
+            }}
+            onPressOut={() => {
+              sendPump("0");
+            }}
+          >
             <Play size={20} color="#34C759" />
           </TouchableOpacity>
         </View>

@@ -2,23 +2,18 @@ import { useFonts } from "expo-font";
 import { useState } from "react";
 import { StyleSheet, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import ListaProgramari from "./components/ListaProgramari";
-import Plantcard from "./components/Plantcard";
-import Programare from "./components/Programare";
-import Settingsmodal from "./components/Settingsmodal";
-
+import ListaProgramari from "../components/ListaProgramari";
+import Plantcard from "../components/Plantcard";
+import Programare from "../components/Programare";
+import Settingsmodal from "../components/Settingsmodal";
 export default function Index() {
   const [fontsLoaded] = useFonts({
-    "Quicksand-Regular": require("../assets/fonts/Quicksand-Regular.ttf"),
-    "Quicksand-Bold": require("../assets/fonts/Quicksand-Bold.ttf"),
+    "Quicksand-Regular": require("../../assets/fonts/Quicksand-Regular.ttf"),
+    "Quicksand-Bold": require("../../assets/fonts/Quicksand-Bold.ttf"),
   });
-  if (!fontsLoaded) return null;
-
-  //Props modal programari
   const [modalProgramare, setModalProgramare] = useState(false);
   const openModalProgramare = () => setModalProgramare(true);
   const closeModalProgramare = () => setModalProgramare(false);
-  //Props modal configurare planta
   const [settingsModal, setSettingsModal] = useState(false);
   const openSettingsModal = () => setSettingsModal(true);
   const closeSettingsModal = () => setSettingsModal(false);
@@ -32,7 +27,9 @@ export default function Index() {
   });
   const updatePlantData = (newData: any) => {
     setPlantData(newData);
-  }
+  };
+
+  if (!fontsLoaded) return null;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -53,6 +50,7 @@ export default function Index() {
         closeSettingsModal={closeSettingsModal}
         plantData={plantData}
         onSave={updatePlantData}
+  
       />
     </SafeAreaView>
   );
