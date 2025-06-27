@@ -48,7 +48,7 @@ const Addplantmodal = ({
 
   const postPlanta = async() =>{
       try {
-        const planta = await fetch("http://192.168.10.51:5000/api/plante",{
+        const planta = await fetch("http://192.168.1.128:5000/api/plante",{
           method: "POST",
           headers: {"Content-Type": "application/json"},
           body: JSON.stringify([inputPlantData])
@@ -116,7 +116,7 @@ const Addplantmodal = ({
     closeLibraryModal();
   };
   const handleSave = async() =>{
-    await postPlanta();
+    postPlanta();
     setInputPlantData(INITIAL_PLANT_DATA);
     resetAnimation();
     closeLibraryModal();

@@ -48,9 +48,11 @@ interface ScheduleItem {
 const Programare = ({
   programModal,
   closeProgramModal,
+  triggerRefresh, // <-- adaugă aici
 }: {
   programModal: boolean;
   closeProgramModal: () => void;
+  triggerRefresh: () => void; // <-- și aici
 }) => {
   //LOGICA TRIMITERE DATE CALENDAR
   const [markedDates, setMarkedDates] = useState<MarkedDates>({});
@@ -83,7 +85,6 @@ const Programare = ({
     if (!schedule) return; // dacă lipsește ceva, se oprește
 
     try {
-      console.log("Programări trimise:", schedule);
       const response = await fetch("http://192.168.1.128:5000/api/programari", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -91,6 +92,7 @@ const Programare = ({
       });
 
       const data = await response.json();
+      triggerRefresh(); // <-- aici
     } catch (error) {
       console.error(error);
     }
@@ -195,7 +197,7 @@ const Programare = ({
                         />
                         <View style={styles.programControls}>
                           <View>
-                            <Text style={styles.inputLabel}>Select Time</Text>
+                            <Text style={styles.inputLabel}>Selecteaza ora</Text>
                             <View style={styles.timeInputs}>
                               <TextInput
                                 style={styles.rangeInput}
@@ -217,7 +219,7 @@ const Programare = ({
                             </View>
                           </View>
                           <View>
-                            <Text style={styles.inputLabel}>Duration</Text>
+                            <Text style={styles.inputLabel}>Durata</Text>
                             <View>
                               <TextInput
                                 style={styles.rangeInput}

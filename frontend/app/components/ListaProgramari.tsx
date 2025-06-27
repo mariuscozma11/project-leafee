@@ -1,6 +1,6 @@
 import { Calendar, Hourglass, Trash } from "lucide-react-native";
-import React, { Fragment, useEffect, useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 type Programare = {
   programari_id: string | number;
@@ -10,7 +10,7 @@ type Programare = {
   duration: string;
 };
 
-const ListaProgramari = () => {
+const ListaProgramari = ({ refresh }: { refresh: boolean }) => {
   const [programari, setProgramari] = useState<Programare[]>([]);
   const deleteProgramare = async (id:string | number) => {
     try {
@@ -18,7 +18,6 @@ const ListaProgramari = () => {
         method: "DELETE",
 
       });
-      console.log(deleteProgramare);
       getProgramari();
     } catch (err) {
       console.error(err);
@@ -35,10 +34,10 @@ const ListaProgramari = () => {
   };
   useEffect(() => {
     getProgramari();
-  }, []);
+  }, [refresh]);
 
   return (
-    <Fragment>
+    <ScrollView>
       <Text style={{ textAlign: "center", fontWeight: "bold", color: "green", fontSize: 20, marginVertical: 10 }}>
         Programari
       </Text>
@@ -48,7 +47,7 @@ const ListaProgramari = () => {
             <View style={styles.programareCell}>
               <Calendar size={24} color={"green"} />
               <Text style={styles.programareText}>
-                {programare.date}, {programare.hour}:{programare.minute}
+                {programare.date}, {String(programare.hour).padStart(2, "0")}:{String(programare.minute).padStart(2, "0")}
               </Text>
             </View>
             <View style={styles.programareCell}>
@@ -61,14 +60,14 @@ const ListaProgramari = () => {
               <TouchableOpacity
                 style={styles.deleteButton}
                 onPress={() => deleteProgramare(programare.programari_id)}
-              >
+              > 
                 <Trash size={22} color={"white"} />
               </TouchableOpacity>
             </View>
           </View>
         </View>
       ))}
-    </Fragment>
+    </ScrollView>
   );
 };
 

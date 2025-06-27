@@ -31,44 +31,62 @@ const Plantcard = ({
     lum: "-",
     temp: "-",
   });
-
   const ws = useRef<WebSocket | null>(null);
+
   useEffect(() => {
-    const ws = new WebSocket("ws://localhost:3000");
+    ws.current = new WebSocket("ws://192.168.1.128:3000");
 
-    ws.onopen = () => {
-      console.log("Connection Established!");
-    };
-    ws.onmessage = (event) => {
-      const response = JSON.parse(event.data);
-      const soilValue = Math.round(
-        ((4095 - response.soil) / (4095 - 100)) * 100
-      ).toString();
+    if (ws.current) {
+      ws.current.onopen = () => {
+        console.log("Connection Established!");
+      };
+      ws.current!.onmessage = (event) => {
+        let data;
+        const raw = event.data as string;
+        if (!raw.trim().startsWith("{")) {
+          console.log("Non-sensor message (ignored):", raw);
+          return;
+        }
+        try {
+          data = JSON.parse(event.data);
+        } catch (err) {
+          console.log("Pump ack:", event.data);
+          return;
+        }
 
-      console.log(response);
-      setReadings({
-        umSol: soilValue,
-        umAer: response.hum,
-        lum: response.lux,
-        temp: response.temp,
-      });
-    };
-    ws.onclose = () => {
-      console.log("Connection Closed!");
-      setReadings({
-        umSol: "-",
-        umAer: "-",
-        lum: "-",
-        temp: "-",
-      });
-    };
+        const response = JSON.parse(event.data);
+        const soilRaw = data.soil;
+        const soilValue = Math.round(
+          ((4095 - soilRaw) / (4095 - 100)) * 100
+        ).toString();
 
-    ws.onerror = () => {
-      console.log("WS Error");
-    };
+        console.log(response);
+        setReadings({
+          umSol: soilValue,
+          umAer: response.hum,
+          lum: response.lux,
+          temp: response.temp,
+        });
+      };
+      ws.current.onclose = () => {
+        console.log("Connection Closed!");
+        setReadings({
+          umSol: "-",
+          umAer: "-",
+          lum: "-",
+          temp: "-",
+        });
+      };
+
+      ws.current.onerror = (error) => {
+        console.log("WS Error", error);
+      };
+    }
 
     return () => {
-      ws.close();
+      if (ws.current) {
+        ws.current.close();
+      }
     };
   }, []);
   const sendPump = (state: string) => {

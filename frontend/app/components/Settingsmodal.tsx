@@ -1,6 +1,8 @@
+import * as ImagePicker from 'expo-image-picker';
 import React, { useEffect, useState } from "react";
 import {
   Dimensions,
+  Image,
   Keyboard,
   KeyboardAvoidingView,
   Modal,
@@ -8,12 +10,12 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
-  Image,
-  TextInput,
 } from "react-native";
+import { Dropdown } from 'react-native-element-dropdown';
 import {
   Gesture,
   GestureDetector,
@@ -26,7 +28,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
-import * as ImagePicker from 'expo-image-picker';
+
 //VARIABILE PENTRU ANIMATIE
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 const THRESHOLD = 50;
@@ -44,6 +46,9 @@ const Settingsmodal = ({
   onSave: (obj: any) => void;
 }) => {
   const [inputPlantData, setInputPlantData] = useState(plantData);
+  const [programari, setProgramari] = useState([]);
+  const [plante, setPlante] = useState([]);
+
   //LOGICA ANIMATIE DESCHIDERE MODAL
   const translateY = useSharedValue(SCREEN_HEIGHT);
   const overlayOpacity = useSharedValue(0);
@@ -113,6 +118,55 @@ const Settingsmodal = ({
       setInputPlantData({ ...plantData, image: result.assets[0].uri });
     }
   };
+  const getProgramari = async () => {
+    try {
+      const response = await fetch("http://192.168.1.128:5000/api/programari");
+      const jsonData = await response.json();
+      setProgramari(jsonData);
+
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  useEffect(() => {
+    getProgramari();
+  }, []);
+  function mapBackendPlantToFrontend(backendPlant: any) {
+    return {
+      plante_id: backendPlant.plante_id, // <-- adaugă această linie!
+      name: backendPlant.nume,
+      image: backendPlant.imagine,
+      humidity: {
+        min: backendPlant.umiditate_sol?.min,
+        max: backendPlant.umiditate_sol?.max,
+      },
+      airHumidity: {
+        min: backendPlant.umiditate_aer?.min,
+        max: backendPlant.umiditate_aer?.max,
+      },
+      brightness: {
+        min: backendPlant.luminozitate?.min,
+        max: backendPlant.luminozitate?.max,
+      },
+      temperature: {
+        min: backendPlant.temperatura?.min,
+        max: backendPlant.temperatura?.max,
+      },
+    };
+  }
+  const getPlante = async () => {
+    try {
+      const response = await fetch("http://192.168.1.128:5000/api/plante");
+      const jsonData = await response.json();
+      setPlante(jsonData.map(mapBackendPlantToFrontend));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  useEffect(() => {
+    getPlante();
+  }, []);
+
   return (
     <Modal
       animationType="none"
@@ -133,8 +187,15 @@ const Settingsmodal = ({
                   <View style={styles.modalHandle} />
                   <ScrollView bounces={false}>
                     <Text style={styles.modalTitle}>Editeaza parametrii plantei</Text>
-
-                    <TouchableOpacity style={styles.imagePickerButton} onPress={pickImage}>
+                    <Dropdown
+                      data={plante}
+                      labelField="name"
+                      valueField="plante_id"
+                      value={inputPlantData.plante_id} // ca să fie selectat corect
+                      onChange={(planta) => setInputPlantData(planta)}
+                      placeholder='Selecteaza planta'
+                    />
+                    <TouchableOpacity style={styles.imagePickerButton} onPress={pickImage} >
                       <Image source={{ uri: inputPlantData.image }} style={styles.previewImage} />
                       <Text style={styles.imagePickerText}>Adauga Imagine</Text>
                     </TouchableOpacity>
@@ -144,10 +205,10 @@ const Settingsmodal = ({
                       style={styles.input}
                       value={inputPlantData.name || ""}
                       onChangeText={(text) =>
-                      setInputPlantData((prev: any) => ({
-                        ...prev,
-                        name: text,
-                      }))
+                        setInputPlantData((prev: any) => ({
+                          ...prev,
+                          name: text,
+                        }))
                       }
                     />
 
@@ -156,7 +217,7 @@ const Settingsmodal = ({
                       <TextInput
                         style={styles.rangeInput}
                         keyboardType="numeric"
-                        value={inputPlantData.humidity.min}
+                        value={String(inputPlantData.humidity.min ?? "")}
                         onChangeText={(text) =>
                           setInputPlantData((prev: any) => ({
                             ...prev,
@@ -168,7 +229,7 @@ const Settingsmodal = ({
                       <TextInput
                         style={styles.rangeInput}
                         keyboardType="numeric"
-                        value={inputPlantData.humidity.max}
+                        value={String(inputPlantData.humidity.max ?? "")}
                         onChangeText={(text) =>
                           setInputPlantData((prev: any) => ({
                             ...prev,
@@ -184,7 +245,7 @@ const Settingsmodal = ({
                       <TextInput
                         style={styles.rangeInput}
                         keyboardType="numeric"
-                        value={inputPlantData.airHumidity.min}
+                        value={String(inputPlantData.airHumidity.min ?? "")}
                         onChangeText={(text) =>
                           setInputPlantData((prev: any) => ({
                             ...prev,
@@ -196,7 +257,7 @@ const Settingsmodal = ({
                       <TextInput
                         style={styles.rangeInput}
                         keyboardType="numeric"
-                        value={inputPlantData.airHumidity.max}
+                        value={String(inputPlantData.airHumidity.max ?? "")}
                         onChangeText={(text) =>
                           setInputPlantData((prev: any) => ({
                             ...prev,
@@ -212,7 +273,7 @@ const Settingsmodal = ({
                       <TextInput
                         style={styles.rangeInput}
                         keyboardType="numeric"
-                        value={inputPlantData.brightness.min}
+                        value={String(inputPlantData.brightness.min ?? "")}
                         onChangeText={(text) =>
                           setInputPlantData((prev: any) => ({
                             ...prev,
@@ -224,7 +285,7 @@ const Settingsmodal = ({
                       <TextInput
                         style={styles.rangeInput}
                         keyboardType="numeric"
-                        value={inputPlantData.brightness.max}
+                        value={String(inputPlantData.brightness.max ?? "")}
                         onChangeText={(text) =>
                           setInputPlantData((prev: any) => ({
                             ...prev,
@@ -240,7 +301,7 @@ const Settingsmodal = ({
                       <TextInput
                         style={styles.rangeInput}
                         keyboardType="numeric"
-                        value={inputPlantData.temperature.min}
+                        value={String(inputPlantData.temperature.min ?? "")}
                         onChangeText={(text) =>
                           setInputPlantData((prev: any) => ({
                             ...prev,
@@ -252,7 +313,7 @@ const Settingsmodal = ({
                       <TextInput
                         style={styles.rangeInput}
                         keyboardType="numeric"
-                        value={inputPlantData.temperature.max}
+                        value={String(inputPlantData.temperature.max ?? "")}
                         onChangeText={(text) =>
                           setInputPlantData((prev: any) => ({
                             ...prev,

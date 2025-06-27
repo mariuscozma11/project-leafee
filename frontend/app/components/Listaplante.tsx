@@ -13,7 +13,7 @@ const Listaplante = ({ refresh }: { refresh: boolean }) => {
   const deletePlanta = async (id: string | number) => {
     try {
       const deletePlanta = await fetch(
-        `http://192.168.10.51:5000/api/plante/${id}`,
+        `http://192.168.1.128:5000/api/plante/${id}`,
         {
           method: "DELETE",
         }
@@ -38,7 +38,7 @@ const Listaplante = ({ refresh }: { refresh: boolean }) => {
 
   const getPlante = async () => {
     try {
-      const response = await fetch("http://192.168.10.51:5000/api/plante");
+      const response = await fetch("http://192.168.1.128:5000/api/plante");
       const jsonData = await response.json();
       setPlante(jsonData);
     } catch (err) {
@@ -99,7 +99,9 @@ const Listaplante = ({ refresh }: { refresh: boolean }) => {
 export default Listaplante;
 
 const styles = StyleSheet.create({
-  parameterList: {},
+  parameterList: {
+    
+  },
   plantParams: {
     fontFamily: "Quicksand",
     marginBottom: 5,
@@ -141,7 +143,7 @@ const styles = StyleSheet.create({
   },
 
   programareRow: {
-    maxHeight: 150,
+    maxHeight: 200,
     flex: 1,
     flexDirection: "row",
     justifyContent: "flex-start",
@@ -149,14 +151,6 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 20,
     padding: 15,
-    // shadowColor: "#000",
-
-    // shadowOffset: {
-    //   width: 0,
-    //   height: 2,
-    // },
-    // shadowOpacity: 0.1,
-    // shadowRadius: 8,
     elevation: 5,
     marginTop: 5,
     marginBottom: 5,

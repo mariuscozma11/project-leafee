@@ -11,13 +11,13 @@ router.post("/programari", async (req, res) => {
     for (const p of programari) {
       const { date, hour, minute, duration } = p;
 
-      console.log("➡️ Primit:", p);
+      console.log("Primit:", p);
 
       if (!date || hour == null || minute == null || duration == null) {
-        console.warn("⚠️ Programare incompletă, ignorată:", p);
+        console.warn("Programare incompletă, ignorată:", p);
         continue;
       }
-
+ 
       await pool.query(
         `INSERT INTO programari(date, hour, minute, duration) VALUES($1, $2, $3, $4)`,
         [date, hour, minute, duration]
@@ -74,8 +74,7 @@ router.put("/programari/:id", async (req, res) => {
   }
 });
 
-//sterge o programare
-
+// Sterge o programare
 router.delete("/programari/:id", async (req, res) => {
   try {
     const { id } = req.params;

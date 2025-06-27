@@ -9,7 +9,7 @@ router.post("/plante", async (req, res) => {
     for (const p of plante) {
       const { name, image, humidity, airHumidity, brightness, temperature } = p;
         
-      console.log("➡️ Primit:", p);
+      console.log("Primit:", p);
 
     
 

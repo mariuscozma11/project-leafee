@@ -26,9 +26,14 @@ export default function Index() {
     temperature: { min: "20", max: "25" },
   });
   const updatePlantData = (newData: any) => {
+    setRefresh(r => !r);
     setPlantData(newData);
   };
-
+  const [refresh, setRefresh] = useState(true);
+  const handleCloseSettingsModal = () => {
+    setSettingsModal(false);
+    setRefresh(r => !r);
+  };
   if (!fontsLoaded) return null;
 
   return (
@@ -40,14 +45,15 @@ export default function Index() {
         openModalProgramare={openModalProgramare}
         openSettingsModal={openSettingsModal}
       />
-      <ListaProgramari />
+      <ListaProgramari refresh={refresh}/>
       <Programare
         programModal={modalProgramare}
         closeProgramModal={closeModalProgramare}
+        triggerRefresh={() => setRefresh(r => !r)}
       />
       <Settingsmodal
         settingsModal={settingsModal}
-        closeSettingsModal={closeSettingsModal}
+        closeSettingsModal={handleCloseSettingsModal}
         plantData={plantData}
         onSave={updatePlantData}
   
